@@ -8,6 +8,7 @@ function App() {
   const [errors, setErrors] = useState({});
   const [extraFields, setExtraFields] = useState([]); // 👈 ekstra field'lar için array
 
+  // --------- VALIDATION ----------
   const validateForm = () => {
     const newErrors = {};
     if (!name.trim()) newErrors.name = "Name is required";
@@ -16,11 +17,13 @@ function App() {
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       newErrors.email = "Invalid email format";
     }
-    if (message.length < 10)
+    if (message.length < 10) {
       newErrors.message = "Message must be at least 10 characters";
+    }
     return newErrors;
   };
 
+  // --------- SUBMIT ----------
   const handleSubmit = (e) => {
     e.preventDefault();
     const formErrors = validateForm();
@@ -33,12 +36,11 @@ function App() {
     alert("Form submitted!");
   };
 
+  // --------- EXTRA FIELDS ----------
   const handleAddField = (type) => {
-    let o={type:type,value:""} // yeni field objesi
-    setExtraFields([...extraFields, o]); // yeni boş field ekle
+    const newField = { type, value: "" };
+    setExtraFields([...extraFields, newField]);
   };
-
-  let obj = {type:"select"}
 
   const handleExtraChange = (index, value) => {
     const updatedFields = [...extraFields];
@@ -46,6 +48,7 @@ function App() {
     setExtraFields(updatedFields);
   };
 
+  // --------- RENDER ----------
   return (
     <main className="max-w-md mx-auto mt-10 p-6">
       <h1 className="text-2xl font-bold text-center mb-4">Almira Form</h1>
@@ -58,8 +61,9 @@ function App() {
           <input
             type="text"
             placeholder="John"
-            className={`input input-bordered w-full ${errors.name ? "input-error" : "input-primary"
-              }`}
+            className={`input input-bordered w-full ${
+              errors.name ? "input-error" : "input-primary"
+            }`}
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
@@ -86,8 +90,9 @@ function App() {
           <input
             type="email"
             placeholder="example@mail.com"
-            className={`input input-bordered w-full ${errors.email ? "input-error" : "input-primary"
-              }`}
+            className={`input input-bordered w-full ${
+              errors.email ? "input-error" : "input-primary"
+            }`}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -100,8 +105,9 @@ function App() {
         <fieldset className="fieldset mb-4">
           <legend className="fieldset-legend">Message</legend>
           <textarea
-            className={`textarea textarea-bordered w-full ${errors.message ? "textarea-error" : "textarea-primary"
-              }`}
+            className={`textarea textarea-bordered w-full ${
+              errors.message ? "textarea-error" : "textarea-primary"
+            }`}
             placeholder="Type something here..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
@@ -110,33 +116,23 @@ function App() {
             <span className="text-error text-sm">{errors.message}</span>
           )}
         </fieldset>
+
         {/* Extra Fields */}
         {extraFields.map((field, index) => (
           <fieldset key={index} className="fieldset mb-4">
             <legend className="fieldset-legend">Extra Field {index + 1}</legend>
-            <input
-              type="text"
-              placeholder={`Extra ${index + 1}`}
-              className="input input-bordered input-accent w-full"
-              value={field.value}
-              onChange={(e) => handleExtraChange(index, e.target.value)}
-            />
-            <span>{ JSON.stringify(field) }</span>
-          </fieldset>
-        ))}
-{/* 
-        {extraFields.map((field, index) => (
-          <fieldset key={index}>
-            <legend>Extra Field {index + 1}</legend>
 
             {field.type === "text" ? (
               <input
                 type="text"
+                placeholder={`Extra ${index + 1}`}
+                className="input input-bordered input-accent w-full"
                 value={field.value}
                 onChange={(e) => handleExtraChange(index, e.target.value)}
               />
             ) : (
               <select
+                className="select select-bordered w-full"
                 value={field.value}
                 onChange={(e) => handleExtraChange(index, e.target.value)}
               >
@@ -146,21 +142,23 @@ function App() {
               </select>
             )}
           </fieldset>
-        ))} */}
+        ))}
 
-        {/* Add Field Button */}
+        {/* Buttons to add fields */}
         <button
           type="button"
           className="btn btn-secondary w-full mb-2"
-          onClick={handleAddField}
+          onClick={() => handleAddField("text")}
         >
-          + Add Field
+          + Add Text Field
         </button>
-
-        {/* Add Select Button */}
-
-        <button onClick={() => handleAddField("text")}className="btn btn-secondary w-full mb-2">+ Add Text Field </button>
-        <button onClick={() => handleAddField("select")}className="btn btn-secondary w-full mb-2">+ Add Select Field </button>
+        <button
+          type="button"
+          className="btn btn-accent w-full mb-2"
+          onClick={() => handleAddField("select")}
+        >
+          + Add Yes/No Field
+        </button>
 
         {/* Submit */}
         <button type="submit" className="btn btn-primary w-full">
