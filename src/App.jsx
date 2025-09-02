@@ -1,4 +1,5 @@
 import { useState } from "react";
+import FilmTable from "./components/FilmTable";
 
 function App() {
   const [name, setName] = useState("");
@@ -7,6 +8,7 @@ function App() {
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState({});
   const [extraFields, setExtraFields] = useState([]); // 👈 ekstra field'lar için array
+
 
   // --------- VALIDATION ----------
   const validateForm = () => {
@@ -61,9 +63,8 @@ function App() {
           <input
             type="text"
             placeholder="John"
-            className={`input input-bordered w-full ${
-              errors.name ? "input-error" : "input-primary"
-            }`}
+            className={`input input-bordered w-full ${errors.name ? "input-error" : "input-primary"
+              }`}
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
@@ -71,6 +72,8 @@ function App() {
             <span className="text-error text-sm">{errors.name}</span>
           )}
         </fieldset>
+
+
 
         {/* Surname */}
         <fieldset className="fieldset mb-4">
@@ -90,9 +93,8 @@ function App() {
           <input
             type="email"
             placeholder="example@mail.com"
-            className={`input input-bordered w-full ${
-              errors.email ? "input-error" : "input-primary"
-            }`}
+            className={`input input-bordered w-full ${errors.email ? "input-error" : "input-primary"
+              }`}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -105,9 +107,8 @@ function App() {
         <fieldset className="fieldset mb-4">
           <legend className="fieldset-legend">Message</legend>
           <textarea
-            className={`textarea textarea-bordered w-full ${
-              errors.message ? "textarea-error" : "textarea-primary"
-            }`}
+            className={`textarea textarea-bordered w-full ${errors.message ? "textarea-error" : "textarea-primary"
+              }`}
             placeholder="Type something here..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
@@ -137,10 +138,14 @@ function App() {
                 onChange={(e) => handleExtraChange(index, e.target.value)}
               >
                 <option value="">Select Yes/No</option>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
               </select>
             )}
+            <span>
+              {JSON.stringify(field)}
+            </span>
+
           </fieldset>
         ))}
 
@@ -160,13 +165,24 @@ function App() {
           + Add Yes/No Field
         </button>
 
+
         {/* Submit */}
         <button type="submit" className="btn btn-primary w-full">
           Submit
         </button>
       </form>
+
+      {/* --- FİLM TABLOSU --- */}
+      <FilmTable />
     </main>
+
+
+
+
   );
+
 }
+
+
 
 export default App;
