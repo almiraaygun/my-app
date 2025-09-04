@@ -1,14 +1,51 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import FilmTable from "./components/FilmTable";
+import FilmEditor from "./components/FilmEditor";
 
 function App() {
+  // --------- FORM STATES ----------
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState({});
-  const [extraFields, setExtraFields] = useState([]); // 👈 ekstra field'lar için array
+  const [extraFields, setExtraFields] = useState([]);
 
+  // --------- FILM EDITOR STATE ----------
+  const [filmsForEditor, setFilmsForEditor] = useState([]);
+  const [filmsLoading, setFilmsLoading] = useState(false);
+  const [filmsError, setFilmsError] = useState("");
+  const [selectedFilmId, setSelectedFilmId] = useState(null);
+
+  // fetch first 20 films for the editor select
+  useEffect(() => {
+    const controller = new AbortController();
+    (async () => {
+      setFilmsLoading(true);
+      setFilmsError("");
+      try {
+        const res = await fetch(
+          "https://voiceco.de/sakila/films?limit=20&offset=0",
+          { signal: controller.signal }
+        );
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        const list = Array.isArray(json)
+          ? json
+          : Array.isArray(json?.data)
+          ? json.data
+          : Array.isArray(json?.rows)
+          ? json.rows
+          : [];
+        setFilmsForEditor(list);
+      } catch (e) {
+        if (e.name !== "AbortError") setFilmsError(e.message ?? "Unknown error");
+      } finally {
+        setFilmsLoading(false);
+      }
+    })();
+    return () => controller.abort();
+  }, []);
 
   // --------- VALIDATION ----------
   const validateForm = () => {
@@ -25,7 +62,7 @@ function App() {
     return newErrors;
   };
 
-  // --------- SUBMIT ----------
+  // --------- FORM SUBMIT ----------
   const handleSubmit = (e) => {
     e.preventDefault();
     const formErrors = validateForm();
@@ -40,22 +77,30 @@ function App() {
 
   // --------- EXTRA FIELDS ----------
   const handleAddField = (type) => {
-    const newField = { type, value: "" };
-    setExtraFields([...extraFields, newField]);
+    setExtraFields([...extraFields, { type, value: "" }]);
   };
-
   const handleExtraChange = (index, value) => {
-    const updatedFields = [...extraFields];
-    updatedFields[index].value = value;
-    setExtraFields(updatedFields);
+    const updated = [...extraFields];
+    updated[index].value = value;
+    setExtraFields(updated);
   };
 
-  // --------- RENDER ----------
+  // --------- FILM EDITOR SAVE ----------
+  const handleSaveFilm = (film) => {
+    console.log("Edited film payload:", film);
+    alert("Film changes prepared (logged to console).");
+  };
+
+  const selectedFilm = filmsForEditor.find(
+    (f) => String(f.film_id) === String(selectedFilmId)
+  );
+
   return (
-    <main className="max-w-md mx-auto mt-10 p-6">
+    <main className="max-w-5xl mx-auto mt-10 p-6">
       <h1 className="text-2xl font-bold text-center mb-4">Almira Form</h1>
       <div className="divider"></div>
 
+      {/* --- FORM --- */}
       <form className="card bg-base-100 shadow-xl p-6" onSubmit={handleSubmit}>
         {/* Name */}
         <fieldset className="fieldset mb-4">
@@ -63,8 +108,9 @@ function App() {
           <input
             type="text"
             placeholder="John"
-            className={`input input-bordered w-full ${errors.name ? "input-error" : "input-primary"
-              }`}
+            className={`input input-bordered w-full ${
+              errors.name ? "input-error" : "input-primary"
+            }`}
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
@@ -72,8 +118,6 @@ function App() {
             <span className="text-error text-sm">{errors.name}</span>
           )}
         </fieldset>
-
-
 
         {/* Surname */}
         <fieldset className="fieldset mb-4">
@@ -93,8 +137,9 @@ function App() {
           <input
             type="email"
             placeholder="example@mail.com"
-            className={`input input-bordered w-full ${errors.email ? "input-error" : "input-primary"
-              }`}
+            className={`input input-bordered w-full ${
+              errors.email ? "input-error" : "input-primary"
+            }`}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -107,12 +152,13 @@ function App() {
         <fieldset className="fieldset mb-4">
           <legend className="fieldset-legend">Message</legend>
           <textarea
-            className={`textarea textarea-bordered w-full ${errors.message ? "textarea-error" : "textarea-primary"
-              }`}
+            className={`textarea textarea-bordered w-full ${
+              errors.message ? "textarea-error" : "textarea-primary"
+            }`}
             placeholder="Type something here..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-          ></textarea>
+          />
           {errors.message && (
             <span className="text-error text-sm">{errors.message}</span>
           )}
@@ -122,7 +168,6 @@ function App() {
         {extraFields.map((field, index) => (
           <fieldset key={index} className="fieldset mb-4">
             <legend className="fieldset-legend">Extra Field {index + 1}</legend>
-
             {field.type === "text" ? (
               <input
                 type="text"
@@ -142,10 +187,6 @@ function App() {
                 <option value="No">No</option>
               </select>
             )}
-            <span>
-              {JSON.stringify(field)}
-            </span>
-
           </fieldset>
         ))}
 
@@ -165,24 +206,39 @@ function App() {
           + Add Yes/No Field
         </button>
 
-
-        {/* Submit */}
         <button type="submit" className="btn btn-primary w-full">
           Submit
         </button>
       </form>
 
-      {/* --- FİLM TABLOSU --- */}
+      {/* --- FILM TABLE --- */}
       <FilmTable />
+
+      {/* --- FILM EDITOR --- */}
+      <section className="mt-10">
+        <h2 className="text-xl font-bold mb-3">🎬 Film Editor</h2>
+        <select
+          className="select select-bordered w-full mb-4"
+          value={selectedFilmId || ""}
+          onChange={(e) => setSelectedFilmId(e.target.value)}
+          disabled={filmsLoading}
+        >
+          <option value="">-- Select a film --</option>
+          {filmsForEditor.map((f) => (
+            <option key={f.film_id} value={f.film_id}>
+              {f.film_id} — {f.title}
+            </option>
+          ))}
+        </select>
+
+        {filmsError && <p className="text-red-500">{filmsError}</p>}
+
+        {selectedFilm && (
+          <FilmEditor film={selectedFilm} onSave={handleSaveFilm} />
+        )}
+      </section>
     </main>
-
-
-
-
   );
-
 }
-
-
 
 export default App;
