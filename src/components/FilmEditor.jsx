@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function FilmEditor({ film, onSave }) {
+export default function FilmEditor({ film, onSave } ) {
   const [title, setTitle] = useState(film?.title || "");
   const [description, setDescription] = useState(film?.description || "");
 

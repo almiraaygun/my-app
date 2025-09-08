@@ -20,22 +20,39 @@ export default function FilmTable() {
       <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
         <table className="table">
           <thead>
-            <tr><th>Id</th><th>Title</th><th>Description</th></tr>
+            <tr>
+              <th>Id</th>
+              <th>Title</th>
+              <th>Description</th>
+              <th className="w-56">Actions</th>
+            </tr>
           </thead>
           <tbody>
             {films.map(f => (
               <tr key={f.film_id}>
                 <td>{f.film_id}</td><td>{f.title}</td><td>{f.description}</td>
+                <tr key={f.film_id}>
+                  <td>{f.film_id}</td>
+                  <td>{f.title}</td>
+                  <td>{f.description}</td>
+                  <td>
+                    <button className="btn btn-sm btn-primary mr-2">Edit</button>
+                    <button className="btn btn-sm btn-error">Delete</button>
+                  </td>
+                </tr>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
       <div className="join grid grid-cols-2 mt-4">
-        <button className="btn join-item btn-outline" disabled={offset===0}
+        <button className="btn join-item btn-outline" disabled={offset === 0}
           onClick={() => setOffset(p => Math.max(p - limit, 0))}>Previous page</button>
         <button className="btn join-item btn-outline"
           onClick={() => setOffset(p => p + limit)}>Next</button>
+
+
+
       </div>
     </section>
   );
