@@ -14,6 +14,16 @@ export default function FilmTable() {
     fetchFilms();
   }, [offset]);
 
+  const handleDelete = async (id) => {
+    if (!confirm("Are you sure you want to delete this film?")) return;
+    try {
+      await fetch(`https://voiceco.de/sakila/films/${id}`, { method: "DELETE" });
+      setFilms(films.filter(f => f.film_id !== id));
+    } catch (err) {
+      console.error("Delete failed", err);
+    }
+  };
+
   return (
     <section className="max-w-5xl mx-auto mt-10 p-6">
       <h2 className="text-2xl font-bold mb-4">🎬 Sakila Films</h2>
@@ -28,18 +38,25 @@ export default function FilmTable() {
             </tr>
           </thead>
           <tbody>
-            {films.map(f => (
+            {films.map((f) => (
               <tr key={f.film_id}>
-                <td>{f.film_id}</td><td>{f.title}</td><td>{f.description}</td>
-                <tr key={f.film_id}>
-                  <td>{f.film_id}</td>
-                  <td>{f.title}</td>
-                  <td>{f.description}</td>
-                  <td>
-                    <button className="btn btn-sm btn-primary mr-2">Edit</button>
-                    <button className="btn btn-sm btn-error">Delete</button>
-                  </td>
-                </tr>
+                <td>{f.film_id}</td>
+                <td>{f.title}</td>
+                <td>{f.description}</td>
+                <td>
+                  <button
+                    className="btn btn-sm btn-primary mr-2"
+                    onClick={() => handleEdit(f)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="btn btn-sm btn-error"
+                    onClick={() => handleDelete(f.film_id)}
+                  >
+                    Delete
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>

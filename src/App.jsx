@@ -30,13 +30,9 @@ function App() {
         );
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
-        const list = Array.isArray(json)
-          ? json
-          : Array.isArray(json?.data)
-          ? json.data
-          : Array.isArray(json?.rows)
-          ? json.rows
-          : [];
+
+        // HAL: liste _embedded.films içinde
+        const list = json?._embedded?.films ?? [];
         setFilmsForEditor(list);
       } catch (e) {
         if (e.name !== "AbortError") setFilmsError(e.message ?? "Unknown error");
@@ -108,9 +104,8 @@ function App() {
           <input
             type="text"
             placeholder="John"
-            className={`input input-bordered w-full ${
-              errors.name ? "input-error" : "input-primary"
-            }`}
+            className={`input input-bordered w-full ${errors.name ? "input-error" : "input-primary"
+              }`}
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
@@ -137,9 +132,8 @@ function App() {
           <input
             type="email"
             placeholder="example@mail.com"
-            className={`input input-bordered w-full ${
-              errors.email ? "input-error" : "input-primary"
-            }`}
+            className={`input input-bordered w-full ${errors.email ? "input-error" : "input-primary"
+              }`}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -152,9 +146,8 @@ function App() {
         <fieldset className="fieldset mb-4">
           <legend className="fieldset-legend">Message</legend>
           <textarea
-            className={`textarea textarea-bordered w-full ${
-              errors.message ? "textarea-error" : "textarea-primary"
-            }`}
+            className={`textarea textarea-bordered w-full ${errors.message ? "textarea-error" : "textarea-primary"
+              }`}
             placeholder="Type something here..."
             value={message}
             onChange={(e) => setMessage(e.target.value)}
