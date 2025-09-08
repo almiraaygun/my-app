@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export default function FilmTable() {
+export default function FilmTable({ onEdit }) {
   const [films, setFilms] = useState([]);
   const [offset, setOffset] = useState(0);
   const limit = 20;
@@ -46,7 +46,7 @@ export default function FilmTable() {
                 <td>
                   <button
                     className="btn btn-sm btn-primary mr-2"
-                    onClick={() => handleEdit(f)}
+                    onClick={() => onEdit(f)}
                   >
                     Edit
                   </button>

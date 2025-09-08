@@ -11,37 +11,10 @@ function App() {
   const [errors, setErrors] = useState({});
   const [extraFields, setExtraFields] = useState([]);
 
-  // --------- FILM EDITOR STATE ----------
-  const [filmsForEditor, setFilmsForEditor] = useState([]);
-  const [filmsLoading, setFilmsLoading] = useState(false);
-  const [filmsError, setFilmsError] = useState("");
-  const [selectedFilmId, setSelectedFilmId] = useState(null);
+  const [selectedFilm, setSelectedFilm] = useState(null);
+  
 
-  // fetch first 20 films for the editor select
-  useEffect(() => {
-    const controller = new AbortController();
-    (async () => {
-      setFilmsLoading(true);
-      setFilmsError("");
-      try {
-        const res = await fetch(
-          "https://voiceco.de/sakila/films?limit=20&offset=0",
-          { signal: controller.signal }
-        );
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json = await res.json();
-
-        // HAL: liste _embedded.films içinde
-        const list = json?._embedded?.films ?? [];
-        setFilmsForEditor(list);
-      } catch (e) {
-        if (e.name !== "AbortError") setFilmsError(e.message ?? "Unknown error");
-      } finally {
-        setFilmsLoading(false);
-      }
-    })();
-    return () => controller.abort();
-  }, []);
+  
 
   // --------- VALIDATION ----------
   const validateForm = () => {
@@ -82,14 +55,11 @@ function App() {
   };
 
   // --------- FILM EDITOR SAVE ----------
-  const handleSaveFilm = (film) => {
+  const handleSaveFilm = async(film) => {
     console.log("Edited film payload:", film);
     alert("Film changes prepared (logged to console).");
   };
 
-  const selectedFilm = filmsForEditor.find(
-    (f) => String(f.film_id) === String(selectedFilmId)
-  );
 
   return (
     <main className="max-w-5xl mx-auto mt-10 p-6">
@@ -205,27 +175,14 @@ function App() {
       </form>
 
       {/* --- FILM TABLE --- */}
-      <FilmTable />
+      <FilmTable onEdit={(film) => setSelectedFilm(film)} />
+        
 
       {/* --- FILM EDITOR --- */}
       <section className="mt-10">
         <h2 className="text-xl font-bold mb-3">🎬 Film Editor</h2>
-        <select
-          className="select select-bordered w-full mb-4"
-          value={selectedFilmId || ""}
-          onChange={(e) => setSelectedFilmId(e.target.value)}
-          disabled={filmsLoading}
-        >
-          <option value="">-- Select a film --</option>
-          {filmsForEditor.map((f) => (
-            <option key={f.film_id} value={f.film_id}>
-              {f.film_id} — {f.title}
-            </option>
-          ))}
-        </select>
 
-        {filmsError && <p className="text-red-500">{filmsError}</p>}
-
+      
         {selectedFilm && (
           <FilmEditor film={selectedFilm} onSave={handleSaveFilm} />
         )}
