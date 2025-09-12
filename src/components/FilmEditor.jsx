@@ -1,16 +1,20 @@
 import { useState } from "react";
 
-export default function FilmEditor({ film, onSave } ) {
+export default function FilmEditor({ film, onSave }) {
   const [title, setTitle] = useState(film?.title || "");
   const [description, setDescription] = useState(film?.description || "");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave({ ...film, title, description });
+
+    const draft = {
+      film_id: film.film_id,
+      title: title.trim(),
+      description: description.trim(),
+    };
+
+    onSave(draft);
   };
-
-  if (!film) return null;
-
   return (
     <form
       onSubmit={handleSubmit}

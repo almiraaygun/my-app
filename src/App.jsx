@@ -1,194 +1,21 @@
-import { useEffect, useState } from "react";
-import FilmTable from "./components/FilmTable";
-import FilmEditor from "./components/FilmEditor";
+import { Link, Routes, Route } from "react-router-dom";
+import DynamicForm from "./pages/DynamicForm";
+import SakilaFilms from "./pages/SakilaFilms";
 
-function App() {
-  // --------- FORM STATES ----------
-  const [name, setName] = useState("");
-  const [surname, setSurname] = useState("");
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
-  const [errors, setErrors] = useState({});
-  const [extraFields, setExtraFields] = useState([]);
-
-  const [selectedFilm, setSelectedFilm] = useState(null);
-  
-
-  
-
-  // --------- VALIDATION ----------
-  const validateForm = () => {
-    const newErrors = {};
-    if (!name.trim()) newErrors.name = "Name is required";
-    if (!email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = "Invalid email format";
-    }
-    if (message.length < 10) {
-      newErrors.message = "Message must be at least 10 characters";
-    }
-    return newErrors;
-  };
-
-  // --------- FORM SUBMIT ----------
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const formErrors = validateForm();
-    if (Object.keys(formErrors).length > 0) {
-      setErrors(formErrors);
-      return;
-    }
-    setErrors({});
-    console.log({ name, surname, email, message, extraFields });
-    alert("Form submitted!");
-  };
-
-  // --------- EXTRA FIELDS ----------
-  const handleAddField = (type) => {
-    setExtraFields([...extraFields, { type, value: "" }]);
-  };
-  const handleExtraChange = (index, value) => {
-    const updated = [...extraFields];
-    updated[index].value = value;
-    setExtraFields(updated);
-  };
-
-  // --------- FILM EDITOR SAVE ----------
-  const handleSaveFilm = async(film) => {
-    console.log("Edited film payload:", film);
-    alert("Film changes prepared (logged to console).");
-  };
-
-
+export default function App() {
   return (
-    <main className="max-w-5xl mx-auto mt-10 p-6">
-      <h1 className="text-2xl font-bold text-center mb-4">Almira Form</h1>
-      <div className="divider"></div>
+    <div className="max-w-5xl mx-auto p-6">
+      <nav className="mb-6 flex gap-3">
+        <Link className="btn btn-sm" to="/">Home</Link>
+        <Link className="btn btn-sm btn-primary" to="/dynamic-form">Dynamic Form</Link>
+        <Link className="btn btn-sm btn-secondary" to="/sakila-films">Sakila Films</Link>
+      </nav>
 
-      {/* --- FORM --- */}
-      <form className="card bg-base-100 shadow-xl p-6" onSubmit={handleSubmit}>
-        {/* Name */}
-        <fieldset className="fieldset mb-4">
-          <legend className="fieldset-legend">Name</legend>
-          <input
-            type="text"
-            placeholder="John"
-            className={`input input-bordered w-full ${errors.name ? "input-error" : "input-primary"
-              }`}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          {errors.name && (
-            <span className="text-error text-sm">{errors.name}</span>
-          )}
-        </fieldset>
-
-        {/* Surname */}
-        <fieldset className="fieldset mb-4">
-          <legend className="fieldset-legend">Surname</legend>
-          <input
-            type="text"
-            placeholder="Doe"
-            className="input input-bordered input-primary w-full"
-            value={surname}
-            onChange={(e) => setSurname(e.target.value)}
-          />
-        </fieldset>
-
-        {/* Email */}
-        <fieldset className="fieldset mb-4">
-          <legend className="fieldset-legend">Email</legend>
-          <input
-            type="email"
-            placeholder="example@mail.com"
-            className={`input input-bordered w-full ${errors.email ? "input-error" : "input-primary"
-              }`}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          {errors.email && (
-            <span className="text-error text-sm">{errors.email}</span>
-          )}
-        </fieldset>
-
-        {/* Message */}
-        <fieldset className="fieldset mb-4">
-          <legend className="fieldset-legend">Message</legend>
-          <textarea
-            className={`textarea textarea-bordered w-full ${errors.message ? "textarea-error" : "textarea-primary"
-              }`}
-            placeholder="Type something here..."
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-          />
-          {errors.message && (
-            <span className="text-error text-sm">{errors.message}</span>
-          )}
-        </fieldset>
-
-        {/* Extra Fields */}
-        {extraFields.map((field, index) => (
-          <fieldset key={index} className="fieldset mb-4">
-            <legend className="fieldset-legend">Extra Field {index + 1}</legend>
-            {field.type === "text" ? (
-              <input
-                type="text"
-                placeholder={`Extra ${index + 1}`}
-                className="input input-bordered input-accent w-full"
-                value={field.value}
-                onChange={(e) => handleExtraChange(index, e.target.value)}
-              />
-            ) : (
-              <select
-                className="select select-bordered w-full"
-                value={field.value}
-                onChange={(e) => handleExtraChange(index, e.target.value)}
-              >
-                <option value="">Select Yes/No</option>
-                <option value="Yes">Yes</option>
-                <option value="No">No</option>
-              </select>
-            )}
-          </fieldset>
-        ))}
-
-        {/* Buttons to add fields */}
-        <button
-          type="button"
-          className="btn btn-secondary w-full mb-2"
-          onClick={() => handleAddField("text")}
-        >
-          + Add Text Field
-        </button>
-        <button
-          type="button"
-          className="btn btn-accent w-full mb-2"
-          onClick={() => handleAddField("select")}
-        >
-          + Add Yes/No Field
-        </button>
-
-        <button type="submit" className="btn btn-primary w-full">
-          Submit
-        </button>
-      </form>
-
-      {/* --- FILM TABLE --- */}
-      <FilmTable onEdit={(film) => setSelectedFilm(film)} />
-        
-
-      {/* --- FILM EDITOR --- */}
-      <section className="mt-10">
-        <h2 className="text-xl font-bold mb-3">🎬 Film Editor</h2>
-
-      
-        {selectedFilm && (
-          <FilmEditor film={selectedFilm} onSave={handleSaveFilm} />
-        )}
-      </section>
-    </main>
+      <Routes>
+        <Route path="/" element={<h2 className="text-xl font-bold">Hoş geldin 👋</h2>} />
+        <Route path="/dynamic-form" element={<DynamicForm />} />
+        <Route path="/sakila-films" element={<SakilaFilms />} />
+      </Routes>
+    </div>
   );
 }
-
-export default App;

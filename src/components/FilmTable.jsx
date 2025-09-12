@@ -1,18 +1,26 @@
 import { useEffect, useState } from "react";
 
-export default function FilmTable({ onEdit }) {
+export default function FilmTable({ onEdit, refreshKey = 0 }) {
   const [films, setFilms] = useState([]);
   const [offset, setOffset] = useState(0);
   const limit = 20;
 
   useEffect(() => {
-    const fetchFilms = async () => {
-      const res = await fetch(`https://voiceco.de/sakila/films?limit=${limit}&offset=${offset}`);
-      const data = await res.json();
-      setFilms(data._embedded?.films || []);
-    };
-    fetchFilms();
-  }, [offset]);
+    let ignore = false;
+    (async () => {
+      try {
+        const res = await fetch(`https://voiceco.de/sakila/films?limit=${limit}&offset=${offset}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        const list = json?._embedded?.films ?? [];
+        if (!ignore) setFilms(list);
+      } catch (e) {
+        if (!ignore) setFilms([]);
+        console.error(e);
+      }
+    })();
+    return () => { ignore = true; };
+  }, [offset, refreshKey]);
 
   const handleDelete = async (id) => {
     if (!confirm("Are you sure you want to delete this film?")) return;
@@ -44,18 +52,17 @@ export default function FilmTable({ onEdit }) {
                 <td>{f.title}</td>
                 <td>{f.description}</td>
                 <td>
-                  <button
-                    className="btn btn-sm btn-primary mr-2"
-                    onClick={() => onEdit(f)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="btn btn-sm btn-error"
-                    onClick={() => handleDelete(f.film_id)}
-                  >
-                    Delete
-                  </button>
+                  <div>
+                    <button className="btn btn-sm btn-primary mr-2" onClick={() => onEdit?.(f)}>
+                      Edit
+                    </button>
+                    <button
+                      className="btn btn-sm btn-error"
+                      onClick={() => handleDelete(f.film_id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -71,6 +78,6 @@ export default function FilmTable({ onEdit }) {
 
 
       </div>
-    </section>
+    </section >
   );
 }
